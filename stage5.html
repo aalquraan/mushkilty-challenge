@@ -75,7 +75,6 @@
   <div id="attempts">محاولة متاحة: 1</div>
   <div id="grid"></div>
   <div id="result"></div>
-  <button onclick="restart()">🔁 إعادة المحاولة</button>
   <button id="winBtn" onclick="finish()">🎉 إنهاء التحدي</button>
 
   <script>
@@ -84,7 +83,6 @@
     const timerDisplay = document.getElementById('timer');
     const attemptsDisplay = document.getElementById('attempts');
     const lightDisplay = document.getElementById('lightCountDisplay');
-    const restartBtn = document.querySelector('button');
     const winBtn = document.getElementById('winBtn');
 
     const totalCells = 400;
@@ -93,7 +91,6 @@
     let successHits = 0;
     let activeIndex = null;
     let interval;
-    let retryUsed = false;
     let cells = [];
 
     function initGrid() {
@@ -125,14 +122,8 @@
 
     function lose() {
       clearInterval(interval);
-      if (!retryUsed) {
-        retryUsed = true;
-        result.textContent = '❌ خسرت! لكن عندك محاولة أخيرة.';
-        restartBtn.style.display = 'inline-block';
-        attemptsDisplay.textContent = 'محاولة متاحة: 0';
-      } else {
-        result.textContent = '💀 انتهت المحاولات!';
-      }
+      result.textContent = '❌ خسرت!';
+      attemptsDisplay.textContent = 'محاولة متاحة: 0';
     }
 
     function startGame() {
@@ -159,17 +150,6 @@
         if (cells[index]) cells[index].classList.remove('highlight');
         if (activeIndex === index) activeIndex = null;
       }, 800);
-    }
-
-    function restart() {
-      successHits = 0;
-      timeLeft = 13;
-      timerDisplay.textContent = `الوقت المتبقي: ${timeLeft}`;
-      lightDisplay.textContent = 'عدد الأضواء المتبقية: 3';
-      result.textContent = '';
-      restartBtn.style.display = 'none';
-      cells.forEach(cell => cell.classList.remove('highlight'));
-      startGame();
     }
 
     function finish() {
