@@ -104,7 +104,8 @@
     }
 
     function handleClick(index) {
-      if (index === activeIndex) {
+      // تحقق أن الخلية ما زالت مضاءة
+      if (cells[index].classList.contains('highlight')) {
         successHits++;
         lightCount++;
         lightDisplay.textContent = `عدد الأضواء المتبقية: ${3 - successHits}`;
