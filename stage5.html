@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> المرحلة 5 - أسرع من الضوء مش راح تحليها </title>
+  <title>المرحلة 5 - اضغط الأضواء بسرعة</title>
   <style>
     body {
       background-color: #111;
@@ -36,9 +36,9 @@
       transform: scale(1.1);
     }
     .highlight {
-      background-color: rgb(110, 110, 0) !important;
+      background-color: rgb(255, 230, 0) !important;
     }
-    #timer, #attempts, #lightCountDisplay {
+    #timer, #lightCountDisplay {
       margin-top: 10px;
       font-size: 1.1rem;
     }
@@ -69,96 +69,98 @@
   </style>
 </head>
 <body>
-  <h1>المرحلة الأخيرة: اضغط الضوء قبل أن يختفي!</h1>
-  <div id="timer">الوقت المتبقي: 13</div>
-  <div id="lightCountDisplay">عدد الأضواء المتبقية: 3</div>
-  <div id="attempts">محاولة متاحة: 1</div>
+  <h1>💡 المرحلة الأخيرة: اضغط على 4 أضواء من أصل 8 بسرعة!</h1>
+  <div id="timer">الوقت المتبقي: 15</div>
+  <div id="lightCountDisplay">الضغطات الناجحة: 0 / 4</div>
   <div id="grid"></div>
   <div id="result"></div>
   <button id="winBtn" onclick="finish()">🎉 إنهاء التحدي</button>
 
   <script>
     const grid = document.getElementById('grid');
-    const result = document.getElementById('result');
     const timerDisplay = document.getElementById('timer');
-    const attemptsDisplay = document.getElementById('attempts');
     const lightDisplay = document.getElementById('lightCountDisplay');
+    const result = document.getElementById('result');
     const winBtn = document.getElementById('winBtn');
 
     const totalCells = 400;
-    let lightCount = 0;
-    let timeLeft = 13;
+    const requiredHits = 4;
+    const totalFlashes = 8;
+    let timeLeft = 15;
     let successHits = 0;
-    let activeIndex = null;
-    let interval;
-    let cells = [];
+    let flashes = 0;
+    let gameEnded = false;
+    const cells = [];
 
     function initGrid() {
       for (let i = 0; i < totalCells; i++) {
         const cell = document.createElement('div');
         cell.classList.add('cell');
-        cell.addEventListener('click', () => handleClick(i));
+        cell.addEventListener('click', () => handleClick(cell));
         grid.appendChild(cell);
         cells.push(cell);
       }
     }
 
-    function handleClick(index) {
-      // تحقق أن الخلية ما زالت مضاءة
-      if (cells[index].classList.contains('highlight')) {
+    function handleClick(cell) {
+      if (cell.classList.contains('highlight') && !gameEnded) {
+        cell.classList.remove('highlight');
         successHits++;
-        lightCount++;
-        lightDisplay.textContent = `عدد الأضواء المتبقية: ${3 - successHits}`;
-        cells[index].classList.remove('highlight');
-        activeIndex = null;
-        if (successHits === 3) {
-          clearInterval(interval);
-          result.textContent = '✔️ خرافي! ضغطت 3 أضواء بسرعة!';
-          winBtn.style.display = 'inline-block';
+        lightDisplay.textContent = `الضغطات الناجحة: ${successHits} / ${requiredHits}`;
+        if (successHits >= requiredHits) {
+          endGame(true);
         }
-      } else {
-        lose();
       }
     }
 
-    function lose() {
-      clearInterval(interval);
-      result.textContent = '❌ خسرت!';
-      attemptsDisplay.textContent = 'محاولة متاحة: 0';
+    function startFlashing() {
+      const flashInterval = setInterval(() => {
+        if (flashes >= totalFlashes || gameEnded) {
+          clearInterval(flashInterval);
+          return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * totalCells);
+        const cell = cells[randomIndex];
+        cell.classList.add('highlight');
+
+        setTimeout(() => {
+          cell.classList.remove('highlight');
+        }, 700);
+
+        flashes++;
+      }, 1000);
     }
 
-    function startGame() {
-      interval = setInterval(() => {
-        timeLeft--;
-        timerDisplay.textContent = `الوقت المتبقي: ${timeLeft}`;
-        if (timeLeft === 0) {
-          clearInterval(interval);
-          if (successHits < 3) lose();
+    function startTimer() {
+      const countdown = setInterval(() => {
+        if (timeLeft <= 0 || gameEnded) {
+          clearInterval(countdown);
+          if (!gameEnded) endGame(false);
+        } else {
+          timeLeft--;
+          timerDisplay.textContent = `الوقت المتبقي: ${timeLeft}`;
         }
       }, 1000);
-
-      const delays = [1000, 3500, 6000];
-      delays.forEach((delay) => {
-        setTimeout(() => showLight(), delay);
-      });
     }
 
-    function showLight() {
-      const index = Math.floor(Math.random() * totalCells);
-      activeIndex = index;
-      cells[index].classList.add('highlight');
-      setTimeout(() => {
-        if (cells[index]) cells[index].classList.remove('highlight');
-        if (activeIndex === index) activeIndex = null;
-      }, 800);
+    function endGame(won) {
+      gameEnded = true;
+      if (won) {
+        result.textContent = "✅ رهيب! أنهيت المرحلة!";
+        winBtn.style.display = "inline-block";
+      } else {
+        result.textContent = "❌ الوقت انتهى! حاول مرة ثانية.";
+      }
     }
 
     function finish() {
-      window.location.href = 'win.html';
+      window.location.href = "win.html";
     }
 
     initGrid();
-    startGame();
+    startFlashing();
+    startTimer();
   </script>
 </body>
 </html>
